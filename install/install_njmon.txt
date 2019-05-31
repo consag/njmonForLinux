@@ -1,0 +1,45 @@
+umask 022
+cd /appl/Informatica
+mkdir -p tooling/njmon/njmon_v25
+cd tooling/njmon
+ln -s njmon_v25 current
+cd current
+
+- Download njmon_linux_code_v25.zip from http://nmon.sourceforge.net/pmwiki.php?n=Site.Njmon
+- Unzip and copy the files njmon_linux_v25.c and Makefile to /appl/Informatica/tooling/njmon/current
+
+make
+
+# verify it created njmon_v25
+
+ln -s njmon_v25 njmon
+
+# try it:
+./njmon -s 5 -c 12 -f -m /tmp
+ls -lrt /tmp
+
+# change the first line in njmon_to_InfluxDB_injector_realtime.py to match your python3 location, eg.:
+#!/appl/Informatica/tooling/njmon/current/njmonInflux/bin/python3
+# also change the host, if you're not using localhost, and potentially the port.
+
+# Make sure you have the python influxdb client in your python3 venv. If not:
+/appl/Informatica/tooling/njmon/current/njmonInflux
+source bin/activate
+
+(njmonInflux) [c62760a@vm00005733 njmonInflux]$ 
+pip3 --proxy http://nl-userproxy-access.net.abnamro.com:8080 --trusted-host pypi.org --trusted-host files.pythonhosted.org install influxdb
+
+
+Tryout run:
+cd /appl/Informatica/tooling/njmon/current/njmonInflux
+source bin/activate
+(njmonInflux) [c62760a@vm00005733 njmonInflux]$ ./capture_load.sh help
+usage: ./capture_load.sh <period_in_minutes> <interval_in_seconds> <pushToInfluxDB>
+  where:
+  <period_in_minutes> = period to monitor the system
+  <interval_in_seconds> = interval between snapshots (in seconds)
+  <pushToInfluxDB> : if N will not push to InfluxDB, else will do
+
+# Monitor for one hour with a 5 second interval between snapshots. Data will be send to InfluxDB
+nohup ./capture_load.sh 60 5 Y &
+

@@ -1,0 +1,31 @@
+cd /appl/Informatica
+mkdir -p tooling/grafana
+cd tooling/grafana
+
+# Download Grafana 6.2.0 from https://dl.grafana.com/oss/release/grafana-6.2.0.linux-amd64.tar.gz 
+# copy the tar.gz to tooling/grafana
+
+tar -zxvf grafana-6.2.0.linux-amd64.tar.gz
+ln -s grafana-6.2.0 current
+cd current
+
+# copy the plugin zip files to /appl/Informatica/tooling/grafana/current/data/plugins 
+# and unzip them, eg.:
+cd /appl/Informatica/tooling/grafana/current/data/plugins
+# copy the clock zip from windows to linux and then:
+unzip grafana-clock-panel-v1.0.3-0-gbb466d0.zip
+
+# copy the start/stop scripts to /appl/Informatica/tooling/grafana
+# start grafana
+cd /appl/Informatica/tooling/grafana
+./startgrafana.sh
+
+Log in using admin/admin. You have to change the admin password, eg. to Welkom.01
+
+# In grafana, create the datasource njmonInflux (use this name as the report template relies on this name)
+Use localhost:8686 as server, njmon is the database. Username and password according the influxDB installation doc.
+Note: If you changed the port for influxdb, use that one here.
+
+Import the dashboard - Grafana-Template for njmon-1558818424142.json
+Note: You might get a grafana-clock-panel not found error. Remove the panel (it only shows the current time), or add it by downloading the zip from https://grafana.com/plugins/grafana-clock-panel/installation and unzipping it in the plugin directory.
+

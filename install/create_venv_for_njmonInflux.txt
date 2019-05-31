@@ -1,0 +1,11 @@
+# assume we have python3.6 available in /appl/Informatica/tooling/python36
+PATH=/appl/Informatica/tooling/python36/bin:$PATH
+export PATH
+cd /appl/Informatica/tooling/njmon/current
+python3 -m venv njmonInflux
+cd njmonInflux/
+source bin/activate
+
+# copy files from C:\Users\C62760\installationfiles\njmonStuff\config\njmonInflux
+# to /appl/Informatica/tooling/njmon/current/njmonInflux
+
