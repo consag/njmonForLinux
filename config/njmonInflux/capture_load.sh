@@ -1,4 +1,15 @@
 #!/bin/bash
+. ./njmon_env.sh
+
+if [ "$1" == "help" ] ; then
+   echo "usage: $0 <period_in_minutes> <interval_in_seconds> <pushToInfluxDB>"
+   echo "  where:"
+   echo "  <period_in_minutes> = period to monitor the system"
+   echo "  <interval_in_seconds> = interval between snapshots (in seconds)"
+   echo "  <pushToInfluxDB> : if N will not push to InfluxDB, else will do"
+   exit 0
+fi
+
 period=$1    # in minutes
 if [ -z "$period" ] ; then
    period=60
@@ -20,8 +31,8 @@ fi
 nrSnapshots=$(( 60 * $period / $interval ))
 echo "$(date) - $0 - Capturing for >$period< minutes. interval is >$interval< seconds. nrSnapshots is >$nrSnapshots<."
 if [ $push -eq 0 ] ; then
-   /appl/njmon/njmon -f -s $interval  -c $nrSnapshots -m /tmp/nmon
+   $NJMON_INSTALLDIR/njmon -P -k -f -s $interval  -c $nrSnapshots -m /tmp/nmon
 else
-   /appl/njmon/njmon -s $interval  -c $nrSnapshots | ./njmon_to_InfluxDB_injector_realtime.py
+   $NJMON_INSTALLDIR/njmon -P -k -s $interval  -c $nrSnapshots | ./njmon_to_InfluxDB_injector_realtime.py
 fi
 

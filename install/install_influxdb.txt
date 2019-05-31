@@ -1,0 +1,34 @@
+cd /appl/Informatica
+mkdir -p tooling/influxdb
+
+# Download influx 1.7.6 from https://dl.influxdata.com/influxdb/releases/influxdb-1.7.6-static_linux_amd64.tar.gz
+# copy the tar.gz to tooling/influxdb
+
+cd tooling/influxdb
+tar -zxvf influxdb-1.7.6-static_linux_amd64.tar.gz
+ln -s influxdb-1.7.6-1 current
+cd current
+
+# change influxdb.conf (on Windows) to reflect the installation location for data, meta and wal
+# copy influxdb.conf 
+# from C:\Users\C62760\installationfiles\njmonStuff\config\influxdb 
+# to tooling/influxdb/current (with this you will overwrite the default config file)
+
+# copy the start, stop, login shell scripts
+# from C:\Users\C62760\installationfiles\njmonStuff\config\influxdb 
+# to tooling/influxdb
+
+# Change INSTALLDIR in influxdb_env.sh to point to the correct location, eg. /appl/Informatica/tooling/influxdb/current
+
+# Login and create admin user
+./initial_login.sh
+create user admin with password 'Welkom.01' with all privileges
+quit
+
+# Login, create the database and user
+./login_admin.sh
+create database njmon
+create user me with password 'notsosecure' with all privileges
+
+
+# Change hostname in njmon_to_InfluxDB_injector_realtime.py
