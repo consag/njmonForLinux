@@ -1,4 +1,4 @@
-#!/appl/njmon/njmonInflux/bin/python3
+#!/appl/Informatica/tooling/njmon/current/njmonInflux/bin/python3
 # This takes jnmon output JSON files and uploads the stats into InfluxDB
 # NOTE YOU NEED TO CHANGE THIS FILE FOR
 # You InfluxDB hostname
@@ -7,6 +7,7 @@
 
 import sys
 import json
+import time
 
 def log(string1,string2):
     debug = False
@@ -140,8 +141,8 @@ def push(host):
     return
 
 #  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-host="linux75infa"
-port=8086
+host="localhost"
+port=8686
 user = 'me'
 password = 'notsosecure'
 dbname = 'njmon'
@@ -150,6 +151,7 @@ from influxdb import InfluxDBClient
 client = InfluxDBClient(host, port, user, password, dbname)
 
 batch=False
+maxDidNotGetAnything =61
 
 count = 0
 saving = 0
@@ -157,28 +159,42 @@ text = ""
 cached = 0
 entry = []
 
-while True:
-    line=sys.stdin.readline().rstrip()
-    log("INPUT line",line)
-    if line[0:3] == "  {":
-        saving=1
-    if saving and line[0:3] == "  }":
-        count=count+1
-        saving=0
-        text=text + "}"
-        log("Sample Dictionary TEXT size ",str(len(text)))
-        host = inject_snapshot(json.loads(text))
-        if batch:
-            cached = cached + 1
-            if cached == 100:
-                print("push count=%d cache=%d"%(count, cached))
-                push(host)
-                cached=0
-        else:
-            push(host)
-        text=""
-    if saving:
-        text=text+line
+didNotGetAnything =0
+
+_stdin_encoding = sys.stdin.encoding or 'utf-8'
+
+while (didNotGetAnything < maxDidNotGetAnything):
+  try:
+    line=sys.stdin.readline()
+    line=line.rstrip()
+    if line:
+       didNotGetAnything = 0
+       log("INPUT line",line)
+       if line[0:3] == "  {":
+           saving=1
+       if saving and line[0:3] == "  }":
+           count=count+1
+           saving=0
+           text=text + "}"
+           log("Sample Dictionary TEXT size ",str(len(text)))
+           host = inject_snapshot(json.loads(text))
+           if batch:
+               cached = cached + 1
+               if cached == 100:
+                   print("push count=%d cache=%d"%(count, cached))
+                   push(host)
+                   cached=0
+           else:
+               push(host)
+           text=""
+       if saving:
+           text=text+line
+    else:
+       didNotGetAnything = didNotGetAnything + 1
+       time.sleep(1) 
+  except UnicodeDecodeError as e:
+    time.sleep(1) 
 
 push(host)
+print("did not get anything for %d seconds. Processing completed."%(didNotGetAnything))
 exit()
